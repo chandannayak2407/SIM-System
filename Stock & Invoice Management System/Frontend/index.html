@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop Name - Secure Operations Portal</title>
+  
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Shop Name">
+  <link rel="apple-touch-icon" href="logo.jpg">
+
+  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlJpbnR1IE1vYmlsZSBJbnZvaWNlIFN5c3RlbSIsCiAgInNob3J0X25hbWUiOiAiUmludHUgTW9iaWxlIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmOGZhZmMiLAogICJ0aGVtZV9jb2xvciI6ICIjMGYxNzJhIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAibG9nby5qcGciLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL2pwZWciCiAgICB9LAogICAgewogICAgICAic3JjIjogImxvZ28uanBnIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9qcGVnIgogICAgfQogIF0KfQ==">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  
+  <style>
+    :root {
+      --bg-canvas: #f8fafc;
+      --bg-surface: #ffffff;
+      --border-color: #e2e8f0;
+      --accent-blue: #0284c7;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --table-header-bg: #f1f5f9;
+      --table-row-even: #f8fafc;
+    }
+
+    body { background-color: var(--bg-canvas); font-family: 'Inter', system-ui, sans-serif; color: var(--text-main); letter-spacing: -0.01em; }
+
+    .brand-logo-circle { width: 44px; height: 44px; border-radius: 50% !important; object-fit: cover; border: 2px solid rgba(255,255,255,0.25); display: inline-block; vertical-align: middle; }
+    .brand-logo-circle-lg { width: 90px; height: 90px; border-radius: 50% !important; object-fit: cover; border: 3px solid var(--accent-blue); display: block; margin: 0 auto 16px; }
+
+    #loginScreen { position: fixed; top:0; left:0; width:100vw; height:100vh; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); display:flex; align-items:center; justify-content:center; z-index:9999; padding:16px; }
+    .login-card { background: white; border-radius:16px; padding:32px 24px; width:100%; max-width:420px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.4); }
+    
+    #globalActionSpinner { position:fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15,23,42,0.8); backdrop-filter: blur(4px); display:none; flex-direction:column; align-items:center; justify-content:center; z-index:10000; color:white; font-weight:600; }
+    
+    .navbar { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-bottom: 1px solid rgba(2, 132, 199, 0.1); padding: 12px 16px; }
+    .navbar-brand { font-size: 18px; font-weight: 700; color: #fff !important; }
+    
+    .main-box { background: var(--bg-surface); border-radius: 16px; padding: 20px 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); border: 1px solid var(--border-color); }
+    .metric-card { background: #ffffff; border-radius: 12px; border: 1px solid var(--border-color); padding: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); height: 100%; }
+    .metric-val { font-size: 20px; font-weight: 700; color: var(--text-main); margin-top: 2px; }
+    .metric-title { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .form-section-title { font-size: 11px; font-weight: 700; color: var(--accent-blue); text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; margin-top: 20px; margin-bottom: 14px; }
+    .nav-pill-custom { background: #e2e8f0; border-radius: 10px; padding: 4px; display: inline-flex; }
+    .nav-pill-custom button { border: none; background: transparent; padding: 6px 16px; font-size: 14px; font-weight: 600; border-radius: 8px; color: var(--text-muted); transition: all 0.2s; }
+    .nav-pill-custom button.active { background: #ffffff; color: var(--accent-blue); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .inline-action-btn { border: 1px solid #cbd5e1; background-color: #ffffff; padding: 4px 8px; font-size: 12px; border-radius: 6px; font-weight: 500; transition: all 0.15s; }
+    .inline-action-btn:hover { background-color: #f1f5f9; transform: translateY(-1px); }
+    .date-filter-box { background: #ffffff; border: 1px solid var(--border-color); border-radius: 10px; padding: 4px 8px; }
+
+    .stock-search-suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #cbd5e1; border-radius: 8px; max-height: 200px; overflow-y: auto; z-index: 1050; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: none; }
+    .stock-suggestion-item { padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13px; transition: background 0.15s; }
+    .stock-suggestion-item:hover { background: #f1f5f9; color: var(--accent-blue); }
+
+    .table-container { display: block; max-height: 440px; overflow-y: auto; overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-color); }
+    th { white-space: nowrap; background-color: var(--table-header-bg) !important; font-size: 11px; font-weight: 700; color: var(--text-muted) !important; text-transform: uppercase; position: sticky; top: 0; z-index: 10; padding: 12px 14px !important; border-bottom: 2px solid #cbd5e1 !important; }
+    td { white-space: nowrap; font-size: 13.5px; padding: 12px 16px !important; vertical-align: middle; background-color: var(--bg-surface); }
+    tr:nth-child(even) td { background-color: var(--table-row-even); }
+    
+    .sticky-action { position: sticky; right: 0; background: var(--bg-surface) !important; box-shadow: -10px 0 20px rgba(0,0,0,0.04); z-index: 5; }
+    th.sticky-action { background-color: var(--table-header-bg) !important; z-index: 11; }
+
+    .mobile-card-grid { display: none; flex-direction: column; gap: 12px; }
+    .responsive-mobile-card { background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .mobile-card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 8px; }
+    .mobile-card-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+    .mobile-card-label { color: var(--text-muted); font-weight: 500; }
+    .mobile-card-value { color: var(--text-main); font-weight: 600; text-align: right; }
+
+    @media (max-width: 768px) {
+      .table-container { display: none !important; }
+      .mobile-card-grid { display: flex !important; }
+      .navbar { flex-direction: column; gap: 12px; text-align: center; }
+      .nav-pill-custom { width: 100%; justify-content: space-between; }
+      .nav-pill-custom button { padding: 6px 10px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="globalActionSpinner">
+    <div class="spinner-border text-light mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+    <div id="globalActionSpinnerText" class="tracking-wide text-uppercase small">Processing operation matrix...</div>
+  </div>
+
+  <div id="loginScreen">
+    <div class="login-card text-center">
+      <img src="logo.jpg" alt="Logo" class="brand-logo-circle-lg" onerror="this.style.display='none'">
+      <h4 class="fw-bold mb-1 text-dark">Shop Name Portal</h4>
+      <p class="text-muted small mb-4">Enter operational credentials to access dashboard</p>
+      <div class="mb-3 text-start">
+        <label class="form-label small fw-semibold text-secondary">User ID</label>
+        <input type="text" id="portalUserField" class="form-control" placeholder="admin" required>
+      </div>
+      <div class="mb-3 text-start">
+        <label class="form-label small fw-semibold text-secondary">System Password</label>
+        <input type="password" id="portalPasswordInput" class="form-control" placeholder="••••••••" onkeyup="if(event.key === 'Enter') attemptPortalLogin()">
+      </div>
+      <button class="btn btn-primary w-100 fw-semibold py-2" style="background-color: var(--accent-blue); border:none;" onclick="attemptPortalLogin()">Unlock Workspace</button>
+      <div id="loginErrorMessage" class="text-danger small mt-2 fw-medium" style="display:none;"><i class="bi bi-exclamation-triangle-fill"></i> Authentication failed. Invalid credentials.</div>
+    </div>
+  </div>
+
+  <div id="mainPortalContent" style="display: none;">
+    <nav class="navbar navbar-dark py-3">
+      <div class="container-fluid px-2 px-md-4">
+        <span class="navbar-brand fw-bold mb-0 d-flex align-items-center gap-2">
+          <img src="logo.jpg" alt="Logo" class="brand-logo-circle" onerror="this.style.display='none'">
+          Shop Name System
+        </span>
+        <div class="d-flex align-items-center gap-2 flex-wrap justify-content-center">
+          <div class="nav-pill-custom">
+            <button id="tabToggleAnalytics" class="active" onclick="switchActiveWorkspace('analytics')"><i class="bi bi-pie-chart-fill"></i> Analytics Hub</button>
+            <button id="tabToggleInvoice" onclick="switchActiveWorkspace('invoice')"><i class="bi bi-receipt"></i> Invoices</button>
+            <button id="tabToggleStock" onclick="switchActiveWorkspace('stock')"><i class="bi bi-box-seam"></i> Stock Inventory</button>
+          </div>
+          <button id="pwaInstallBtn" class="btn btn-sm btn-warning fw-bold px-3 py-2" style="border-radius:8px; display:none;" onclick="triggerPwaInstallation()"><i class="bi bi-download"></i> Install App</button>
+          <button class="btn btn-sm btn-danger fw-bold px-3 py-2" style="border-radius:8px;" onclick="executeSystemLogout()"><i class="bi bi-box-arrow-right"></i> Logout</button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid px-2 px-md-4 my-4">
+      
+      <div class="d-flex flex-column flex-xl-row justify-content-between align-items-stretch align-items-xl-center mb-3 gap-3">
+        <h5 class="fw-bold m-0 text-secondary d-flex align-items-center gap-2" id="workspacePanelTitleText"><i class="bi bi-activity text-primary"></i> Data Summary Analytics</h5>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2 date-filter-box shadow-sm text-muted small">
+            <span class="fw-medium text-secondary">From:</span>
+            <input type="date" id="custom_start_date" class="border-0 bg-transparent text-dark p-0 small" style="outline:none;" onchange="syncWorkspaceDataDeck()">
+            <span class="fw-medium text-secondary border-start ps-2">To:</span>
+            <input type="date" id="custom_end_date" class="border-0 bg-transparent text-dark p-0 small" style="outline:none;" onchange="syncWorkspaceDataDeck()">
+          </div>
+        </div>
+      </div>
+
+      <div id="workspaceRegionAnalytics">
+        <div class="row g-2 g-md-3 mb-4">
+          <div class="col-md-4"><div class="metric-card border-start border-4 border-primary"><div class="metric-title text-primary fw-bold">Total Stock (Procurement)</div><div class="metric-val" id="dash_totalStockVal">₹0.00</div><div class="text-muted small mt-1 font-monospace" id="dash_totalStockQty">0 Units Registered</div></div></div>
+          <div class="col-md-4"><div class="metric-card border-start border-4 border-success"><div class="metric-title text-success fw-bold">Available Stock (Inventory)</div><div class="metric-val" id="dash_availStockVal">₹0.00</div><div class="text-muted small mt-1 font-monospace" id="dash_availStockQty">0 Units Available</div></div></div>
+          <div class="col-md-4"><div class="metric-card border-start border-4 border-danger"><div class="metric-title text-danger fw-bold">Sold Stock (Acquisition Cost)</div><div class="metric-val" id="dash_soldStockVal">₹0.00</div><div class="text-muted small mt-1 font-monospace" id="dash_soldStockQty">0 Units Processed</div></div></div>
+          <div class="col-md-4"><div class="metric-card border-start border-4 border-info"><div class="metric-title text-info fw-bold">Total Sales (Turnover Value)</div><div class="metric-val" id="dash_totalSalesVal">₹0.00</div><div class="text-muted small mt-1 font-monospace" id="dash_totalSalesQty">0 Invoices Generated</div></div></div>
+          <div class="col-md-4"><div class="metric-card border-start border-4 border-warning"><div class="metric-title text-warning fw-bold">Available Balance (Projected Value)</div><div class="metric-val" id="dash_availSalesVal">₹0.00</div><div class="text-muted small mt-1 font-monospace" id="dash_availSalesQty">0 Units Shelf Valuation</div></div></div>
+          <div class="col-md-4"><div class="metric-card border-start border-4 border-secondary"><div class="metric-title text-secondary fw-bold">Sold Realized Yield (Revenue Matrix)</div><div class="metric-val" id="dash_soldSalesVal">₹0.00</div><div class="text-muted small mt-1 font-monospace" id="dash_soldSalesQty">0 Units Delivered</div></div></div>
+        </div>
+        <div class="chart-container-box p-3 bg-white border rounded-4 shadow-sm">
+          <div style="position: relative; height:240px; width:100%;"><canvas id="salesTimelineChart"></canvas></div>
+        </div>
+      </div>
+
+      <div id="workspaceRegionInvoice" class="main-box" style="display:none;">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <div class="d-flex gap-2 align-items-center flex-grow-1 w-100 flex-sm-nowrap">
+            <input type="text" id="invoiceSearchField" class="form-control" placeholder="Search invoices..." onkeyup="renderInvoiceTableLayout()">
+            <button class="btn btn-outline-success btn-sm fw-semibold text-nowrap" onclick="exportDataToExcel('invoice')"><i class="bi bi-file-earmark-excel"></i> Export Excel</button>
+          </div>
+          <button class="btn btn-primary btn-sm fw-bold w-100 w-sm-auto" onclick="openInvoiceFormModal(true)"><i class="bi bi-plus-circle"></i> Create New Invoice</button>
+        </div>
+        
+        <div class="table-responsive table-container">
+          <table class="table table-hover m-0">
+            <thead>
+              <tr>
+                <th>Invoice No.</th><th>Name</th><th>Mobile No.</th><th>Address</th><th>Date</th><th>GSTIN</th>
+                <th>Brand Name</th><th>Model</th><th>Varient</th><th>Quantity</th><th>IMEI1 / Serial No.</th>
+                <th>HSN/SAC</th><th>Color / Color Code</th><th>Amount</th><th>CGST (9%)</th><th>SGST (9%)</th>
+                <th>Total Amount</th><th>Finance Company Name</th><th>Loan No.</th><th>Down Payment</th>
+                <th>EMI Amount</th><th>EMI Tenure (Months)</th><th class="text-center sticky-action">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="invoiceTableContent"></tbody>
+          </table>
+        </div>
+        <div class="mobile-card-grid" id="invoiceMobileContainer"></div>
+      </div>
+
+      <div id="workspaceRegionStock" class="main-box" style="display:none;">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <div class="d-flex gap-2 align-items-center flex-grow-1 w-100 flex-sm-nowrap">
+            <input type="text" id="stockSearchField" class="form-control" placeholder="Search stock inventory..." onkeyup="renderStockTableLayout()">
+            <button class="btn btn-outline-success btn-sm fw-semibold text-nowrap" onclick="exportDataToExcel('stock')"><i class="bi bi-file-earmark-excel"></i> Export Excel</button>
+          </div>
+          <button class="btn btn-success btn-sm fw-bold w-100 w-sm-auto" onclick="openStockFormModal()"><i class="bi bi-plus-circle"></i> Add New Stock Item</button>
+        </div>
+        
+        <div class="table-responsive table-container">
+          <table class="table table-hover m-0">
+            <thead>
+              <tr>
+                <th>Date</th><th>Brand Name</th><th>Model</th><th>Variant</th><th>Quantity</th>
+                <th>IMEI1 / Serial No.</th><th>HSN/SAC</th><th>Color / Color Code</th><th>Amount</th>
+                <th>CGST (9%)</th><th>SGST (9%)</th><th>Total Amount</th><th>Current Status</th>
+                <th class="text-center sticky-action">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="stockTableContent"></tbody>
+          </table>
+        </div>
+        <div class="mobile-card-grid" id="stockMobileContainer"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="modal fade" id="invoiceFormModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold text-dark" id="invoiceModalHeaderLabel">Invoice Allocation Matrix</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="invoiceForm">
+            <input type="hidden" id="f_rowIndex">
+            
+            <div id="stockSelectRowBlock" class="mb-3 position-relative">
+              <label class="form-label small fw-bold text-primary"><i class="bi bi-search"></i> Search Stock by Model / Brand / IMEI String</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" id="f_stockSearchInput" class="form-control border-start-0 ps-0" placeholder="Type to filter inventory instantly..." onkeyup="executeStockFilterMatching(this.value)" autocomplete="off">
+              </div>
+              <div id="stockSuggestionsBox" class="stock-search-suggestions"></div>
+            </div>
+
+            <div class="form-section-title">Customer Details</div>
+            <div class="row g-3">
+              <div class="col-md-4"><label class="small text-muted">Invoice No.</label><input type="text" id="f_id" class="form-control" readonly></div>
+              <div class="col-md-4"><label class="small text-muted">Name</label><input type="text" id="f_name" class="form-control" required></div>
+              <div class="col-md-4"><label class="small text-muted">Mobile No.</label><input type="text" id="f_mobile" class="form-control" required></div>
+              <div class="col-md-8"><label class="small text-muted">Address</label><input type="text" id="f_address" class="form-control" required></div>
+              <div class="col-md-4"><label class="small text-muted">Date</label><input type="date" id="f_date" class="form-control" required></div>
+              <div class="col-md-4"><label class="small text-muted">GSTIN</label><input type="text" id="f_gstin" class="form-control"></div>
+            </div>
+            
+            <div class="form-section-title">Product details</div>
+            <div class="row g-3">
+              <div class="col-md-3"><label class="small text-muted">Brand Name</label><input type="text" id="f_brand" class="form-control" required></div>
+              <div class="col-md-3"><label class="small text-muted">Model</label><input type="text" id="f_model" class="form-control" required></div>
+              <div class="col-md-3"><label class="small text-muted">Variant</label><input type="text" id="f_variant" class="form-control" required></div>
+              <div class="col-md-3"><label class="small text-muted">Quantity</label><input type="number" id="f_qty" class="form-control" value="1" required></div>
+              <div class="col-md-4"><label class="small text-muted">IMEI1 / Serial No.</label><input type="text" id="f_imei" class="form-control" required></div>
+              <div class="col-md-4"><label class="small text-muted">HSN/SAC</label><input type="text" id="f_hsn" class="form-control" required></div>
+              <div class="col-md-4"><label class="small text-muted">Color Code</label><input type="text" id="f_color" class="form-control" required></div>
+              <div class="col-md-3"><label class="small text-muted">Amount (₹)</label><input type="text" id="f_amount" class="form-control" readonly></div>
+              <div class="col-md-3"><label class="small text-muted">CGST (9%)</label><input type="text" id="f_cgst" class="form-control" readonly></div>
+              <div class="col-md-3"><label class="small text-muted">SGST (9%)</label><input type="text" id="f_sgst" class="form-control" readonly></div>
+              <div class="col-md-3"><label class="small fw-bold text-success">Total Amount (₹)</label><input type="number" id="f_total" class="form-control text-success fw-bold" step="0.01" onkeyup="computeReverseTaxMetrics('invoice')" required></div>
+            </div>
+            
+            <div class="form-section-title">Finance Details</div>
+            <div class="row g-3">
+              <div class="col-md-4"><label class="small text-primary fw-semibold">Loan with TVS?</label><select id="f_tvsLoan" class="form-select" onchange="document.getElementById('f_finCompany').value = (this.value==='Yes'?'TVS Credit':'')"><option value="No">No</option><option value="Yes">Yes</option></select></div>
+              <div class="col-md-4"><label class="small text-muted">Finance Company Name</label><input type="text" id="f_finCompany" class="form-control"></div>
+              <div class="col-md-4"><label class="small text-muted">Loan No.</label><input type="text" id="f_loanNo" class="form-control"></div>
+              <div class="col-md-4"><label class="small text-muted">Down Payment</label><input type="text" id="f_downPayment" class="form-control"></div>
+              <div class="col-md-4"><label class="small text-muted">EMI Amount</label><input type="text" id="f_emiAmount" class="form-control"></div>
+              <div class="col-md-4"><label class="small text-muted">EMI Tenure (Months)</label><input type="text" id="f_emiTenure" class="form-control"></div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary btn-sm" id="btnSaveInvoice" onclick="commitInvoicePayload()">Save Invoice</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="stockFormModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header bg-success-subtle">
+          <h5 class="modal-title fw-bold text-dark" id="stockModalHeaderLabel"><i class="bi bi-box-seam"></i> Stock Allocation Layout</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="stockForm">
+            <input type="hidden" id="s_stockId">
+            <div class="row g-3">
+              <div class="col-md-12"><label class="small text-muted">Procurement Date</label><input type="date" id="s_date" class="form-control" required></div>
+              <div class="col-md-6"><label class="small text-muted">Brand Name</label><input type="text" id="s_brand" class="form-control" required></div>
+              <div class="col-md-6"><label class="small text-muted">Model</label><input type="text" id="s_model" class="form-control" required></div>
+              <div class="col-md-6">
+                <label class="small text-muted">Variant Profile</label>
+                <select id="s_variant" class="form-select" required>
+                  <option value="Not Applicable">Not Applicable</option><option value="1+8 GB">1+8 GB</option><option value="1+16 GB">1+16 GB</option><option value="2+16 GB">2+16 GB</option><option value="2+32 GB">2+32 GB</option><option value="2+64 GB">2+64 GB</option><option value="3+16 GB">3+16 GB</option><option value="3+32 GB">3+32 GB</option><option value="3+64 GB">3+64 GB</option><option value="4+32 GB">4+32 GB</option><option value="4+64 GB">4+64 GB</option><option value="4+128 GB">4+128 GB</option><option value="4+256 GB">4+256 GB</option><option value="6+64 GB">6+64 GB</option><option value="6+128 GB">6+128 GB</option><option value="6+256 GB">6+256 GB</option><option value="6+512 GB">6+512 GB</option><option value="8+64 GB">8+64 GB</option><option value="8+128 GB">8+128 GB</option><option value="8+256 GB">8+256 GB</option><option value="8+512 GB">8+512 GB</option><option value="12+128 GB">12+128 GB</option><option value="12+256 GB">12+256 GB</option><option value="12+512 GB">12+512 GB</option><option value="12+1 TB">12+1 TB</option><option value="16+128 GB">16+128 GB</option><option value="16+256 GB">16+256 GB</option><option value="16+512 GB">16+512 GB</option><option value="16+1 TB">16+1 TB</option><option value="16+2 TB">16+2 TB</option><option value="18+512 GB">18+512 GB</option><option value="18+1 TB">18+1 TB</option><option value="24+1 TB">24+1 TB</option>
+                </select>
+              </div>
+              <div class="col-md-6"><label class="small text-muted">Quantity Intake</label><input type="number" id="s_qty" class="form-control" value="1" required></div>
+              <div class="col-md-12"><label class="small text-muted">IMEI1 / Serial No.</label><input type="text" id="s_imei" class="form-control" required></div>
+              <div class="col-md-6"><label class="small text-muted">HSN / SAC Code</label><input type="text" id="s_hsn" class="form-control" required></div>
+              <div class="col-md-6"><label class="small text-muted">Color / Color Code</label><input type="text" id="s_color" class="form-control" required></div>
+              <div class="col-md-6"><label class="small text-muted">Amount (₹)</label><input type="text" id="s_amount" class="form-control" readonly></div>
+              <div class="col-md-3"><label class="small text-muted">CGST (9%)</label><input type="text" id="s_cgst" class="form-control" readonly></div>
+              <div class="col-md-3"><label class="small text-muted">SGST (9%)</label><input type="text" id="s_sgst" class="form-control" readonly></div>
+              <div class="col-md-12"><label class="small fw-bold text-success">Total Amount (₹)</label><input type="number" id="s_total" class="form-control text-success fw-bold" step="0.01" onkeyup="computeReverseTaxMetrics('stock')" required></div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success btn-sm" id="btnSaveStock" onclick="commitStockPayload()">Save Intake Allocation</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbyEipzP5dQFVAl85CJx7-RaT13DqYHiADjaMcSsLj7B-iAHAblP1C7eWbG-88OWYIKBIQ/exec";
+    let cacheInvoices = [];
+    let cacheStocks = [];
+    let activeWorkspace = 'analytics';
+    let globalChartInstance = null;
+    let modalInvoice, modalStock;
+    let cachedPasscode = "";
+    let deferredPromptEventInstance = null;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPromptEventInstance = e;
+      document.getElementById('pwaInstallBtn').style.display = 'inline-block';
+    });
+
+    function triggerPwaInstallation() {
+      if (!deferredPromptEventInstance) return;
+      deferredPromptEventInstance.prompt();
+      deferredPromptEventInstance.userChoice.then((choice) => {
+        if(choice.outcome === 'accepted') document.getElementById('pwaInstallBtn').style.display = 'none';
+        deferredPromptEventInstance = null;
+      });
+    }
+
+    function showLoader(text = "Syncing system arrays...") {
+      document.getElementById('globalActionSpinnerText').innerText = text;
+      document.getElementById('globalActionSpinner').style.display = 'flex';
+    }
+    function hideLoader() { document.getElementById('globalActionSpinner').style.display = 'none'; }
+
+    window.onload = () => {
+      modalInvoice = new bootstrap.Modal(document.getElementById('invoiceFormModal'));
+      modalStock = new bootstrap.Modal(document.getElementById('stockFormModal'));
+      if(sessionStorage.getItem('portal_token')) {
+        cachedPasscode = sessionStorage.getItem('portal_token');
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainPortalContent').style.display = 'block';
+        syncWorkspaceDataDeck();
+      }
+    };
+
+    function attemptPortalLogin() {
+      const user = document.getElementById('portalUserField').value.trim();
+      const pin = document.getElementById('portalPasswordInput').value;
+      if(user !== "admin") { document.getElementById('loginErrorMessage').style.display = 'block'; return; }
+      
+      showLoader("Authenticating operational session...");
+      fetch(`${API_URL}?action=getNextInvoiceNumber&passcode=${encodeURIComponent(pin)}`)
+        .then(res => res.json()).then(res => {
+          if (res.status === 'success') {
+            cachedPasscode = pin;
+            sessionStorage.setItem('portal_token', pin);
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainPortalContent').style.display = 'block';
+            syncWorkspaceDataDeck();
+          } else { document.getElementById('loginErrorMessage').style.display = 'block'; }
+        }).catch(() => { document.getElementById('loginErrorMessage').style.display = 'block'; }).finally(() => hideLoader());
+    }
+
+    function executeSystemLogout() {
+      sessionStorage.clear(); cachedPasscode = "";
+      document.getElementById('mainPortalContent').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+    }
+
+    function switchActiveWorkspace(targetTab) {
+      showLoader(`Navigating to ${targetTab}...`);
+      setTimeout(() => {
+        activeWorkspace = targetTab;
+        ['Analytics', 'Invoice', 'Stock'].forEach(t => document.getElementById(`tabToggle${t}`).classList.remove('active'));
+        document.getElementById(`tabToggle${targetTab.charAt(0).toUpperCase() + targetTab.slice(1)}`).classList.add('active');
+        
+        document.getElementById('workspaceRegionAnalytics').style.display = (targetTab === 'analytics' ? 'block' : 'none');
+        document.getElementById('workspaceRegionInvoice').style.display = (targetTab === 'invoice' ? 'block' : 'none');
+        document.getElementById('workspaceRegionStock').style.display = (targetTab === 'stock' ? 'block' : 'none');
+        
+        document.getElementById('workspacePanelTitleText').innerHTML = 
+          targetTab === 'analytics' ? '<i class="bi bi-activity text-primary"></i> Data Summary Analytics' :
+          targetTab === 'invoice' ? '<i class="bi bi-receipt text-primary"></i> Invoice Ledger Management' : '<i class="bi bi-box-seam text-primary"></i> Inventory Stock Control';
+        
+        hideLoader();
+      }, 150);
+    }
+
+    function syncWorkspaceDataDeck() {
+      showLoader("Retrieving live database rows...");
+      fetch(`${API_URL}?action=getAggregateDashboardMetrics&passcode=${encodeURIComponent(cachedPasscode)}`)
+        .then(res => res.json()).then(res => {
+          if(res.status === 'success') {
+            cacheInvoices = res.data.invoices;
+            cacheStocks = res.data.stock;
+            evaluateDashboardAggregates();
+            renderInvoiceTableLayout();
+            renderStockTableLayout();
+          }
+        }).finally(() => hideLoader());
+    }
+
+    function evaluateDashboardAggregates() {
+      const startVal = document.getElementById('custom_start_date').value;
+      const endVal = document.getElementById('custom_end_date').value;
+      const sDate = startVal ? new Date(startVal).setHours(0,0,0,0) : null;
+      const eDate = endVal ? new Date(endVal).setHours(23,59,59,999) : null;
+
+      let tStockCost = 0, tStockQty = 0, aStockCost = 0, aStockQty = 0, sStockCost = 0, sStockQty = 0;
+      let tSalesVal = 0, tSalesQty = 0, aSalesVal = 0, aSalesQty = 0, sSalesVal = 0, sSalesQty = 0;
+      let timelineMap = {};
+
+      cacheStocks.forEach(stk => {
+        let d = new Date(stk.date);
+        if(sDate && d < sDate) return; if(eDate && d > eDate) return;
+        let cost = parseFloat(stk.total || 0); let qty = parseInt(stk.quantity || 0);
+        tStockCost += cost; tStockQty += qty;
+        if (stk.status === "AVAILABLE") { aStockCost += cost; aStockQty += qty; } 
+        else if (stk.status === "SOLD") { sStockCost += cost; sStockQty += qty; }
+      });
+
+      cacheInvoices.forEach(inv => {
+        let d = new Date(inv.date);
+        if(sDate && d < sDate) return; if(eDate && d > eDate) return;
+        let saleVal = parseFloat(inv.total || 0);
+        tSalesVal += saleVal; tSalesQty++;
+        if(inv.date) { timelineMap[inv.date] = (timelineMap[inv.date] || 0) + saleVal; }
+      });
+
+      sSalesQty = sStockQty; sSalesVal = tSalesVal; aSalesQty = aStockQty; aSalesVal = aStockCost * 1.18;
+
+      document.getElementById('dash_totalStockVal').innerText = '₹' + tStockCost.toLocaleString('en-IN', {minimumFractionDigits: 2});
+      document.getElementById('dash_totalStockQty').innerText = `${tStockQty} Units Registered`;
+      document.getElementById('dash_availStockVal').innerText = '₹' + aStockCost.toLocaleString('en-IN', {minimumFractionDigits: 2});
+      document.getElementById('dash_availStockQty').innerText = `${aStockQty} Units Available`;
+      document.getElementById('dash_soldStockVal').innerText = '₹' + sStockCost.toLocaleString('en-IN', {minimumFractionDigits: 2});
+      document.getElementById('dash_soldStockQty').innerText = `${sStockQty} Units Sold`;
+      document.getElementById('dash_totalSalesVal').innerText = '₹' + tSalesVal.toLocaleString('en-IN', {minimumFractionDigits: 2});
+      document.getElementById('dash_totalSalesQty').innerText = `${tSalesQty} Invoices Generated`;
+      document.getElementById('dash_availSalesVal').innerText = '₹' + aSalesVal.toLocaleString('en-IN', {minimumFractionDigits: 2});
+      document.getElementById('dash_availSalesQty').innerText = `${aSalesQty} Unsold Units`;
+      document.getElementById('dash_soldSalesVal').innerText = '₹' + sSalesVal.toLocaleString('en-IN', {minimumFractionDigits: 2});
+      document.getElementById('dash_soldSalesQty').innerText = `${sSalesQty} Realized Units`;
+
+      const ctx = document.getElementById('salesTimelineChart');
+      if (globalChartInstance) globalChartInstance.destroy();
+      globalChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: Object.keys(timelineMap),
+          datasets: [{ label: 'Sales Yield (₹)', data: Object.values(timelineMap), borderColor: '#0284c7', tension: 0.15, fill: true, backgroundColor: 'rgba(2,132,199,0.04)' }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
+    }
+
+    function renderInvoiceTableLayout() {
+      const query = document.getElementById('invoiceSearchField').value.toLowerCase();
+      const desktopTarget = document.getElementById('invoiceTableContent');
+      const mobileTarget = document.getElementById('invoiceMobileContainer');
+      desktopTarget.innerHTML = ""; mobileTarget.innerHTML = "";
+      
+      const startVal = document.getElementById('custom_start_date').value;
+      const endVal = document.getElementById('custom_end_date').value;
+      const sDate = startVal ? new Date(startVal).setHours(0,0,0,0) : null;
+      const eDate = endVal ? new Date(endVal).setHours(23,59,59,999) : null;
+
+      cacheInvoices.filter(x => {
+        let d = new Date(x.date); if(sDate && d < sDate) return false; if(eDate && d > eDate) return false;
+        return x.name.toLowerCase().includes(query) || x.invoiceNo.includes(query);
+      }).forEach(item => {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span class="badge bg-light text-dark border">#${item.invoiceNo}</span></td><td class="fw-semibold">${item.name}</td><td>${item.mobile}</td>
+          <td class="text-truncate" style="max-width:140px;" title="${item.address}">${item.address}</td><td>${item.date}</td><td>${item.gstin || '-'}</td>
+          <td class="text-uppercase">${item.brand}</td><td class="text-uppercase">${item.model}</td><td>${item.variant}</td><td>${item.quantity}</td>
+          <td class="font-monospace small text-uppercase">${item.imei}</td><td>${item.hsn}</td><td class="text-uppercase">${item.color}</td>
+          <td>₹${parseFloat(item.amount || 0).toFixed(2)}</td><td>₹${parseFloat(item.cgst || 0).toFixed(2)}</td><td>₹${parseFloat(item.sgst || 0).toFixed(2)}</td>
+          <td class="fw-bold text-success">₹${parseFloat(item.total || 0).toFixed(2)}</td><td>${item.financeCompany || '-'}</td><td>${item.loanNo || '-'}</td>
+          <td>₹${item.downPayment || '0'}</td><td>₹${item.emiAmount || '0'}</td><td>${item.emiTenure || '-'}</td>
+          <td class="text-center sticky-action">
+            <div class="d-flex gap-1 justify-content-center">
+              <button class="inline-action-btn text-primary" onclick="openInvoiceFormModal(false, ${item.invoiceNo})"><i class="bi bi-pencil-square"></i></button>
+              <button class="inline-action-btn text-dark" onclick="dispatchPDFRequest(this, ${item.invoiceNo})"><i class="bi bi-file-pdf"></i></button>
+              <button class="inline-action-btn text-success" onclick="dispatchWhatsAppShare(this, ${item.invoiceNo})"><i class="bi bi-whatsapp"></i></button>
+              <button class="inline-action-btn text-danger" onclick="dispatchDeleteRow('invoice', ${item.invoiceNo})"><i class="bi bi-trash3"></i></button>
+            </div>
+          </td>
+        `;
+        desktopTarget.appendChild(tr);
+
+        let mCard = document.createElement('div');
+        mCard.className = "responsive-mobile-card";
+        mCard.innerHTML = `
+          <div class="mobile-card-header">
+            <span class="badge bg-primary">#${item.invoiceNo}</span>
+            <span class="fw-bold text-success">₹${parseFloat(item.total).toFixed(2)}</span>
+          </div>
+          <div class="mobile-card-row"><span class="mobile-card-label">Customer</span><span class="mobile-card-value">${item.name}</span></div>
+          <div class="mobile-card-row"><span class="mobile-card-label">Mobile</span><span class="mobile-card-value">${item.mobile}</span></div>
+          <div class="mobile-card-row"><span class="mobile-card-label">Product</span><span class="mobile-card-value">${item.brand} ${item.model}</span></div>
+          <div class="mobile-card-row"><span class="mobile-card-label">IMEI</span><span class="mobile-card-value font-monospace small">${item.imei}</span></div>
+          <div class="mobile-card-row"><span class="mobile-card-label">Date</span><span class="mobile-card-value">${item.date}</span></div>
+          <div class="d-flex gap-1 mt-3 w-100 justify-content-between">
+            <button class="btn btn-sm btn-outline-primary flex-grow-1 py-2" onclick="openInvoiceFormModal(false, ${item.invoiceNo})"><i class="bi bi-pencil-square"></i> Edit</button>
+            <button class="btn btn-sm btn-outline-dark flex-grow-1 py-2" onclick="dispatchPDFRequest(this, ${item.invoiceNo})"><i class="bi bi-file-pdf"></i> PDF</button>
+            <button class="btn btn-sm btn-outline-success flex-grow-1 py-2" onclick="dispatchWhatsAppShare(this, ${item.invoiceNo})"><i class="bi bi-whatsapp"></i> Share</button>
+            <button class="btn btn-sm btn-outline-danger flex-grow-1 py-2" onclick="dispatchDeleteRow('invoice', ${item.invoiceNo})"><i class="bi bi-trash3"></i> Delete</button>
+          </div>
+        `;
+        mobileTarget.appendChild(mCard);
+      });
+    }
+
+    function renderStockTableLayout() {
+      const query = document.getElementById('stockSearchField').value.toLowerCase();
+      const desktopTarget = document.getElementById('stockTableContent');
+      const mobileTarget = document.getElementById('stockMobileContainer');
+      desktopTarget.innerHTML = ""; mobileTarget.innerHTML = "";
+      
+      const startVal = document.getElementById('custom_start_date').value;
+      const endVal = document.getElementById('custom_end_date').value;
+      const sDate = startVal ? new Date(startVal).setHours(0,0,0,0) : null;
+      const eDate = endVal ? new Date(endVal).setHours(23,59,59,999) : null;
+
+      cacheStocks.filter(x => {
+        let d = new Date(x.date); if(sDate && d < sDate) return false; if(eDate && d > eDate) return false;
+        return x.brand.toLowerCase().includes(query) || x.model.toLowerCase().includes(query);
+      }).forEach(item => {
+        let isSold = item.status === "SOLD";
+        let statusBadge = isSold ? `<span class="badge bg-danger">SOLD</span>` : `<span class="badge bg-success">AVAILABLE</span>`;
+        
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.date}</td><td class="fw-semibold text-uppercase">${item.brand}</td><td class="text-uppercase">${item.model}</td>
+          <td><span class="badge bg-secondary-subtle text-dark border">${item.variant}</span></td><td class="fw-bold text-primary">${item.quantity}</td>
+          <td class="text-truncate font-monospace small text-uppercase" style="max-width:120px;">${item.imei}</td><td class="text-uppercase">${item.hsn}</td>
+          <td class="text-uppercase">${item.color}</td><td>₹${parseFloat(item.amount).toFixed(2)}</td><td class="text-muted">₹${parseFloat(item.cgst).toFixed(2)}</td>
+          <td class="text-muted">₹${parseFloat(item.sgst).toFixed(2)}</td><td class="fw-bold text-success">₹${parseFloat(item.total).toFixed(2)}</td><td>${statusBadge}</td>
+          <td class="text-center sticky-action">
+            <div class="d-flex gap-1 justify-content-center">
+              <button class="inline-action-btn text-primary border-primary-subtle" onclick="openModifyStockLayout(${item.stockId})"><i class="bi bi-pencil-square"></i> Edit</button>
+              <button class="inline-action-btn text-danger border-danger-subtle" onclick="dispatchDeleteRow('stock', ${item.stockId})"><i class="bi bi-trash3"></i> Delete</button>
+            </div>
+          </td>
+        `;
+        desktopTarget.appendChild(tr);
+
+        let mCard = document.createElement('div');
+        mCard.className = "responsive-mobile-card";
+        mCard.innerHTML = `
+          <div class="mobile-card-header">
+            <span class="fw-bold text-uppercase">${item.brand} ${item.model}</span>
+            ${statusBadge}
+          </div>
+          <div class="mobile-card-row"><span class="mobile-card-label">Variant</span><span class="mobile-card-value">${item.variant}</span></div>
+          <div class="mobile-card-row"><span class="mobile-card-label">IMEI</span><span class="mobile-card-value font-monospace small">${item.imei}</span></div>
+          <div class="mobile-card-row"><span class="mobile-card-label">Total Cost</span><span class="mobile-card-value text-success font-monospace">₹${parseFloat(item.total).toFixed(2)}</span></div>
+          <div class="mobile-card-row"><span class="mobile-card-label">Date</span><span class="mobile-card-value">${item.date}</span></div>
+          <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-sm btn-outline-primary flex-grow-1 py-2" onclick="openModifyStockLayout(${item.stockId})"><i class="bi bi-pencil-square"></i> Edit</button>
+            <button class="btn btn-sm btn-outline-danger flex-grow-1 py-2" onclick="dispatchDeleteRow('stock', ${item.stockId})"><i class="bi bi-trash3"></i> Delete</button>
+          </div>
+        `;
+        mobileTarget.appendChild(mCard);
+      });
+    }
+
+    function executeStockFilterMatching(queryText) {
+      const box = document.getElementById('stockSuggestionsBox');
+      if(!queryText.trim()) { box.style.display = "none"; return; }
+      
+      let term = queryText.toLowerCase();
+      let matches = cacheStocks.filter(stk => 
+        stk.status === "AVAILABLE" && 
+        (stk.brand.toLowerCase().includes(term) || stk.model.toLowerCase().includes(term) || stk.imei.toLowerCase().includes(term))
+      );
+      
+      if(matches.length === 0) { box.innerHTML = `<div class="stock-suggestion-item text-muted">No available matches found.</div>`; box.style.display="block"; return; }
+      
+      box.innerHTML = "";
+      matches.forEach(stk => {
+        let div = document.createElement('div');
+        div.className = "stock-suggestion-item";
+        div.innerHTML = `<strong>${stk.brand} ${stk.model}</strong> (${stk.variant}) <br> <span class="text-muted font-monospace small">IMEI: ${stk.imei} | ₹${stk.total}</span>`;
+        div.onclick = () => {
+          document.getElementById('f_stockSearchInput').value = `${stk.brand} ${stk.model} (IMEI: ${stk.imei})`;
+          box.style.display = "none";
+          bindSelectedStockItemToForm(stk.imei);
+        };
+        box.appendChild(div);
+      });
+      box.style.display = "block";
+    }
+
+    function bindSelectedStockItemToForm(imeiKey) {
+      const match = cacheStocks.find(stk => stk.imei === imeiKey.toUpperCase());
+      if(!match) return;
+      document.getElementById('f_brand').value = match.brand.toUpperCase();
+      document.getElementById('f_model').value = match.model.toUpperCase();
+      document.getElementById('f_variant').value = match.variant;
+      document.getElementById('f_qty').value = "1";
+      document.getElementById('f_imei').value = match.imei.toUpperCase();
+      document.getElementById('f_hsn').value = match.hsn.toUpperCase();
+      document.getElementById('f_color').value = match.color.toUpperCase();
+      document.getElementById('f_total').value = parseFloat(match.total).toFixed(2);
+      computeReverseTaxMetrics('invoice');
+    }
+
+    function openInvoiceFormModal(isNew, existingInvoiceId = null) {
+      document.getElementById('invoiceForm').reset();
+      document.getElementById('f_stockSearchInput').value = "";
+      document.getElementById('stockSuggestionsBox').style.display = "none";
+
+      if(isNew) {
+        document.getElementById('invoiceModalHeaderLabel').innerHTML = "Create New Invoice Allocation";
+        document.getElementById('stockSelectRowBlock').style.display = "block";
+        showLoader("Fetching sequence index...");
+        fetch(`${API_URL}?action=getNextInvoiceNumber&passcode=${encodeURIComponent(cachedPasscode)}`)
+          .then(res => res.json()).then(res => {
+            document.getElementById('f_id').value = res.data;
+            document.getElementById('f_date').value = new Date().toISOString().substring(0, 10);
+            ['f_name', 'f_mobile', 'f_address', 'f_gstin', 'f_brand', 'f_model', 'f_variant', 'f_imei', 'f_hsn', 'f_color', 'f_finCompany', 'f_loanNo', 'f_downPayment', 'f_emiAmount', 'f_emiTenure'].forEach(id => document.getElementById(id).value = "Not Applicable");
+            document.getElementById('f_qty').value = "1"; document.getElementById('f_amount').value = "0.00"; document.getElementById('f_cgst').value = "0.00"; document.getElementById('f_sgst').value = "0.00"; document.getElementById('f_total').value = "0.00";
+            modalInvoice.show();
+          }).finally(() => hideLoader());
+      } else {
+        document.getElementById('invoiceModalHeaderLabel').innerHTML = `Modify Invoice #${existingInvoiceId}`;
+        document.getElementById('stockSelectRowBlock').style.display = "none";
+        const inv = cacheInvoices.find(x => x.invoiceNo == existingInvoiceId); if(!inv) return;
+        document.getElementById('f_id').value = inv.invoiceNo; document.getElementById('f_name').value = inv.name; document.getElementById('f_mobile').value = inv.mobile; document.getElementById('f_address').value = inv.address; document.getElementById('f_date').value = inv.date; document.getElementById('f_gstin').value = inv.gstin || "Not Applicable"; document.getElementById('f_brand').value = inv.brand; document.getElementById('f_model').value = inv.model; document.getElementById('f_variant').value = inv.variant; document.getElementById('f_qty').value = inv.quantity; document.getElementById('f_imei').value = inv.imei; document.getElementById('f_hsn').value = inv.hsn; document.getElementById('f_color').value = inv.color; document.getElementById('f_total').value = inv.total; document.getElementById('f_finCompany').value = inv.financeCompany; document.getElementById('f_loanNo').value = inv.loanNo; document.getElementById('f_downPayment').value = inv.downPayment; document.getElementById('f_emiAmount').value = inv.emiAmount; document.getElementById('f_emiTenure').value = inv.emiTenure; document.getElementById('f_tvsLoan').value = inv.tvsLoan === "Yes" ? "Yes" : "No";
+        computeReverseTaxMetrics('invoice'); modalInvoice.show();
+      }
+    }
+
+    function computeReverseTaxMetrics(mode) {
+      const prefix = mode === 'invoice' ? 'f_' : 's_';
+      const total = parseFloat(document.getElementById(`${prefix}total`).value) || 0;
+      const baseAmt = parseFloat((total / 1.18).toFixed(2));
+      const individualTax = parseFloat((baseAmt * 0.09).toFixed(2));
+      document.getElementById(`${prefix}amount`).value = baseAmt.toFixed(2);
+      document.getElementById(`${prefix}cgst`).value = individualTax.toFixed(2);
+      document.getElementById(`${prefix}sgst`).value = individualTax.toFixed(2);
+    }
+
+    function openStockFormModal() {
+      document.getElementById('stockForm').reset(); document.getElementById('s_stockId').value = "";
+      document.getElementById('stockModalHeaderLabel').innerHTML = `<i class="bi bi-box-seam"></i> Add Stock Procurement Record`;
+      document.getElementById('s_date').value = new Date().toISOString().substring(0, 10);
+      document.getElementById('s_hsn').value = "Not Applicable"; document.getElementById('s_color').value = "Not Applicable";
+      modalStock.show();
+    }
+
+    function openModifyStockLayout(rowId) {
+      const match = cacheStocks.find(x => x.stockId == rowId); if(!match) return;
+      document.getElementById('stockForm').reset(); document.getElementById('s_stockId').value = match.stockId;
+      document.getElementById('stockModalHeaderLabel').innerHTML = `<i class="bi bi-pencil-square"></i> Modify Stock Item Row #${match.stockId}`;
+      document.getElementById('s_date').value = match.date; document.getElementById('s_brand').value = match.brand; document.getElementById('s_model').value = match.model; document.getElementById('s_variant').value = match.variant; document.getElementById('s_qty').value = match.quantity; document.getElementById('s_imei').value = match.imei; document.getElementById('s_hsn').value = match.hsn; document.getElementById('s_color').value = match.color; document.getElementById('s_total').value = match.total;
+      computeReverseTaxMetrics('stock'); modalStock.show();
+    }
+
+    function commitInvoicePayload() {
+      const targetPayload = {
+        invoiceNo: parseInt(document.getElementById('f_id').value, 10), name: document.getElementById('f_name').value, mobile: document.getElementById('f_mobile').value, address: document.getElementById('f_address').value, date: document.getElementById('f_date').value, gstin: document.getElementById('f_gstin').value, brand: document.getElementById('f_brand').value, model: document.getElementById('f_model').value, variant: document.getElementById('f_variant').value, quantity: document.getElementById('f_qty').value, imei: document.getElementById('f_imei').value, hsn: document.getElementById('f_hsn').value, color: document.getElementById('f_color').value, amount: document.getElementById('f_amount').value, cgst: document.getElementById('f_cgst').value, sgst: document.getElementById('f_sgst').value, total: document.getElementById('f_total').value, financeCompany: document.getElementById('f_finCompany').value, loanNo: document.getElementById('f_loanNo').value, downPayment: document.getElementById('f_downPayment').value, emiAmount: document.getElementById('f_emiAmount').value, emiTenure: document.getElementById('f_emiTenure').value, tvsLoan: document.getElementById('f_tvsLoan').value
+      };
+      showLoader("Transmitting sales transaction payload...");
+      fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "saveOrUpdateInvoice", passcode: cachedPasscode, data: targetPayload }) })
+        .then(res => res.json()).then(() => { modalInvoice.hide(); syncWorkspaceDataDeck(); }).catch(() => hideLoader());
+    }
+
+    function commitStockPayload() {
+      const targetPayload = {
+        stockId: document.getElementById('s_stockId').value, date: document.getElementById('s_date').value, brand: document.getElementById('s_brand').value.toUpperCase(), model: document.getElementById('s_model').value.toUpperCase(), variant: document.getElementById('s_variant').value, quantity: document.getElementById('s_qty').value, imei: document.getElementById('s_imei').value.toUpperCase(), hsn: document.getElementById('s_hsn').value.toUpperCase(), color: document.getElementById('s_color').value.toUpperCase(), amount: document.getElementById('s_amount').value, cgst: document.getElementById('s_cgst').value, sgst: document.getElementById('s_sgst').value, total: document.getElementById('s_total').value
+      };
+      showLoader("Transmitting inventory acquisition payload...");
+      fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "saveStock", passcode: cachedPasscode, data: targetPayload }) })
+        .then(res => res.json()).then(() => { modalStock.hide(); syncWorkspaceDataDeck(); }).catch(() => hideLoader());
+    }
+
+    function dispatchDeleteRow(type, identifierKey) {
+      if(!confirm("Are you sure you want to completely delete this entry?")) return;
+      showLoader("Purging target structural dataset...");
+      const targetAction = type === 'invoice' ? 'deleteInvoice' : 'deleteStock';
+      const bodyPayload = { action: targetAction, passcode: cachedPasscode };
+      if(type === 'invoice') bodyPayload.invoiceNo = identifierKey; else bodyPayload.stockId = identifierKey;
+      fetch(API_URL, { method: 'POST', body: JSON.stringify(bodyPayload) }).then(res => res.json()).then(() => syncWorkspaceDataDeck()).catch(() => hideLoader());
+    }
+
+    function dispatchPDFRequest(btn, id) {
+      showLoader("Compiling document calculations...");
+      fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "generateInvoicePDF", passcode: cachedPasscode, invoiceNo: id }) })
+        .then(res => res.json()).then(res => { if(res.status==='success') window.open(res.url, '_blank'); }).finally(() => hideLoader());
+    }
+
+    function dispatchWhatsAppShare(btn, id) {
+      const match = cacheInvoices.find(x => x.invoiceNo == id); if (!match) return;
+      showLoader("Initializing document deployment link...");
+      fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "generateInvoicePDF", passcode: cachedPasscode, invoiceNo: id }) })
+        .then(res => res.json()).then(res => {
+          if (res.status === 'success') {
+            let phone = match.mobile.replace(/\D/g, ''); if(phone.length === 10) phone = "91" + phone;
+            const text = `*SHOP NAME - RECEIPT*%0A*Invoice:* %23${match.invoiceNo}%0A*Total Bill:* ₹${parseFloat(match.total).toFixed(2)}%0A📁 *Download Tax Invoice PDF:* ${res.url}`;
+            window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+          }
+        }).finally(() => hideLoader());
+    }
+
+    function exportDataToExcel(mode) {
+      const startVal = document.getElementById('custom_start_date').value;
+      const endVal = document.getElementById('custom_end_date').value;
+      const sDate = startVal ? new Date(startVal).setHours(0,0,0,0) : null;
+      const eDate = endVal ? new Date(endVal).setHours(23,59,59,999) : null;
+      let rowsToExport = [], filename = "";
+
+      if (mode === 'invoice') {
+        filename = `Invoices_${new Date().toISOString().substring(0,10)}.xlsx`;
+        rowsToExport = cacheInvoices.filter(x => { let d = new Date(x.date); return !(sDate && d < sDate || eDate && d > eDate); }).map(item => ({
+          "Invoice No": item.invoiceNo, "Customer Name": item.name, "Mobile": item.mobile, "Address": item.address, "Date": item.date, "GSTIN": item.gstin, "Brand": item.brand, "Model": item.model, "Variant": item.variant, "Qty": item.quantity, "IMEI/Serial": item.imei, "HSN": item.hsn, "Color": item.color, "Base Amount": parseFloat(item.amount), "CGST": parseFloat(item.cgst), "SGST": parseFloat(item.sgst), "Total Amount": parseFloat(item.total), "Finance Co": item.financeCompany, "Loan No": item.loanNo, "DownPayment": item.downPayment, "EMI": item.emiAmount, "Tenure": item.emiTenure
+        }));
+      } else {
+        filename = `Inventory_${new Date().toISOString().substring(0,10)}.xlsx`;
+        rowsToExport = cacheStocks.filter(x => { let d = new Date(x.date); return !(sDate && d < sDate || eDate && d > eDate); }).map(item => ({
+          "Date": item.date, "Brand Name": item.brand, "Model": item.model, "Variant": item.variant, "Quantity": parseInt(item.quantity), "IMEI1/Serial No": item.imei, "HSN/SAC": item.hsn, "Color": item.color, "Base Amount": parseFloat(item.amount), "CGST": parseFloat(item.cgst), "SGST": parseFloat(item.sgst), "Total Amount": parseFloat(item.total), "Status": item.status
+        }));
+      }
+      if(rowsToExport.length === 0) { alert("No structured items found inside selected parameters."); return; }
+      const worksheet = XLSX.utils.json_to_sheet(rowsToExport);
+      const workbook = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+      XLSX.writeFile(workbook, filename);
+    }
+
+    document.addEventListener('click', (e) => {
+      if(e.target.id !== 'f_stockSearchInput') {
+        const box = document.getElementById('stockSuggestionsBox');
+        if(box) box.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
